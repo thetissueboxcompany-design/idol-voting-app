@@ -1,0 +1,133 @@
+// ~/idol_voting/frontend/src/app/admin/voting-lines/page.tsx
+'use client';
+
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+
+interface VotingLine {
+  id: number;
+  name: string;
+  start_time: string;
+  end_time: string;
+  max_votes_per_user: number;
+  is_active: boolean;
+}
+
+export default function VotingLinesPage() {
+  const [lines, setLines] = useState<VotingLine[]>([]);
+  const [name, setName] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [maxVotes, setMaxVotes] = useState('50');
+  const [error, setError] = useState('');
+
+  const fetchLines = async () => {
+    try {
+      const token = localStorage.getItem('adminAccessToken');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL + '/api/admin/voting-lines';
+      const response = await axios.get(apiUrl, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setLines(response.data);
+    } catch (err) {
+      setError('Failed to fetch voting lines.');
+    }
+  };
+
+  useEffect(() => {
+    fetchLines();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    try {
+      const token = localStorage.getItem('adminAccessToken');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL + '/api/admin/voting-lines';
+      await axios.post(
+        apiUrl,
+        {
+          name,
+          start_time: new Date(startTime).toISOString(),
+          end_time: new Date(endTime).toISOString(),
+          max_votes_per_user: parseInt(maxVotes, 10),
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // Refresh the list
+      fetchLines();
+      // Clear form
+      setName('');
+      setStartTime('');
+      setEndTime('');
+      setMaxVotes('50');
+    } catch (err) {
+      setError('Failed to create voting line.');
+    }
+  };
+
+  const handleToggleActive = async (line: VotingLine) => {
+    try {
+        const token = localStorage.getItem('adminAccessToken');
+        const action = line.is_active ? 'deactivate' : 'activate';
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/admin/voting-lines/${line.id}/${action}`;
+        await axios.patch(apiUrl, {}, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        fetchLines();
+    } catch (err) {
+        setError(`Failed to ${line.is_active ? 'deactivate' : 'activate'} line.`);
+    }
+  };
+
+  return (
+    <div>
+      <h1 className="text-3xl font-bold mb-6">Manage Voting Lines</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="md:col-span-1">
+          <h2 className="text-2xl font-semibold mb-4">Create New Line</h2>
+          <form onSubmit={handleSubmit} className="p-4 bg-gray-800 rounded-lg space-y-4">
+            {/* Form fields */}
+            <div>
+                <label htmlFor="name" className="block text-sm font-medium">Line Name</label>
+                <input type="text" id="name" value={name} onChange={e => setName(e.target.value)} required className="mt-1 block w-full px-3 py-2 text-black rounded-md"/>
+            </div>
+            <div>
+                <label htmlFor="start_time" className="block text-sm font-medium">Start Time</label>
+                <input type="datetime-local" id="start_time" value={startTime} onChange={e => setStartTime(e.target.value)} required className="mt-1 block w-full px-3 py-2 text-black rounded-md"/>
+            </div>
+            <div>
+                <label htmlFor="end_time" className="block text-sm font-medium">End Time</label>
+                <input type="datetime-local" id="end_time" value={endTime} onChange={e => setEndTime(e.target.value)} required className="mt-1 block w-full px-3 py-2 text-black rounded-md"/>
+            </div>
+            <div>
+                <label htmlFor="max_votes" className="block text-sm font-medium">Max Votes Per User</label>
+                <input type="number" id="max_votes" value={maxVotes} onChange={e => setMaxVotes(e.target.value)} required className="mt-1 block w-full px-3 py-2 text-black rounded-md"/>
+            </div>
+            <button type="submit" className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 rounded-md font-bold">Create Line</button>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+          </form>
+        </div>
+        <div className="md:col-span-2">
+          <h2 className="text-2xl font-semibold mb-4">Existing Voting Lines</h2>
+          <div className="space-y-4">
+            {lines.map(line => (
+                <div key={line.id} className={`p-4 rounded-lg ${line.is_active ? 'bg-green-900' : 'bg-gray-800'}`}>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h3 className="text-xl font-bold">{line.name}</h3>
+                            <p className="text-sm">Votes per user: {line.max_votes_per_user}</p>
+                        </div>
+                        <button onClick={() => handleToggleActive(line)} className={`px-4 py-2 rounded-md font-bold ${line.is_active ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'}`}>
+                            {line.is_active ? 'Deactivate' : 'Activate'}
+                        </button>
+                    </div>
+                </div>
+            ))}
+            {lines.length === 0 && <p>No voting lines found.</p>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

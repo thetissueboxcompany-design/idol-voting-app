@@ -1,0 +1,13 @@
+# Python backend specifics
+backend/venv/
+backend/__pycache__/
+backend/.env
+
+# Node.js frontend specifics
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+
+# General
+.DS_Store
