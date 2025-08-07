@@ -52,7 +52,7 @@ export default function LoginForm() {
     }
 
     try {
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/send-otp`;
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL + '/api/auth/send-otp';
       const payload = loginMethod === 'mobile' 
         ? { mobile_number: identifier } 
         : { email: identifier };
@@ -72,7 +72,7 @@ export default function LoginForm() {
     setMessage('');
 
     try {
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/verify-otp`;
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL + '/api/auth/verify-otp';
       const payload = loginMethod === 'mobile'
         ? { mobile_number: identifier, otp_code: otp }
         : { email: identifier, otp_code: otp };
