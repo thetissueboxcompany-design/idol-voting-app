@@ -19,7 +19,8 @@ def get_password_hash(password):
 
 
 # --- JWT Configuration ---
-SECRET_KEY = os.getenv("SECRET_KEY", "a_very_secret_key_for_dev")
+# SECRET_KEY = os.getenv("SECRET_KEY", "a_very_secret_key_for_dev")
+SECRET_KEY = os.getenv("SECRET_KEY", "arhamedia_idol_voting")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 # Token is valid for 60 minutes
 
