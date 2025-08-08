@@ -1,4 +1,4 @@
-// ~/idol_voting/frontend/src/components/auth/LoginForm.tsx
+//   ~/idol_voting/frontend/src/components/auth/LoginForm.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
