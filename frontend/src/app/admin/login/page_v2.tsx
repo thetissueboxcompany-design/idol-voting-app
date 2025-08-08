@@ -16,10 +16,10 @@ export default function AdminLoginPage() {
     setError('');
 
     try {
-      // HIGHLIGHT: Corrected the apiUrl construction
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/admin/login`;
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL + '/api/admin/login';
       const response = await axios.post(apiUrl, { username, password });
 
+      // Store the admin token separately from the user token
       localStorage.setItem('adminAccessToken', response.data.access_token);
       router.push('/admin/dashboard');
     } catch (err) {
